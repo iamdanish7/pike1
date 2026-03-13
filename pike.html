@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pike Phylogenetic Analysis</title>
+  <meta name="description" content="Phylogenetic analysis of pike species (Esox) — sequence alignments, evolutionary trees, and research results.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── Distance table ──────────────────────────────── */
+    .dist-table { width:100%; border-collapse:collapse; font-size:0.8rem; font-family:'JetBrains Mono',monospace; }
+    .dist-table th, .dist-table td { padding:0.45rem 0.7rem; text-align:center; border:1px solid rgba(255,255,255,0.07); white-space:nowrap; }
+    .dist-table thead th { background:rgba(255,255,255,0.05); color:var(--accent-1); font-weight:600; font-size:0.75rem; }
+    .dist-table tbody tr:hover td { background:rgba(255,255,255,0.04); }
+    .dist-table td:first-child { color:var(--accent-1); font-weight:600; text-align:left; background:rgba(255,255,255,0.03); }
+    .dist-table td.zero { color:rgba(255,255,255,0.25); }
+    .dist-table td.low  { color:#6ee7b7; }
+    .dist-table td.mid  { color:#fcd34d; }
+    .dist-table td.high { color:#f87171; }
+  </style>
+</head>
+
+<body>
+
+  <!-- ─── ANIMATED BACKGROUND ───────────────────────── -->
+  <div class="bg-effects">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <!-- ─── NAVBAR ────────────────────────────────────── -->
+  <nav class="navbar">
+    <a class="logo" href="#">
+      <span class="logo-icon">🧬</span>
+      Pike Lab
+    </a>
+    <span class="nav-badge">v2.0 — 2026</span>
+  </nav>
+
+  <!-- ─── PAGE CONTENT ──────────────────────────────── -->
+  <main class="page-wrapper">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="pill">
+        <span class="dot"></span>
+        Phylogenetic Research
+      </div>
+      <h1>
+        <span class="gradient-text">Pike Phylogenetic</span><br>
+        Analysis Project
+      </h1>
+      <p class="subtitle">
+        Comprehensive evolutionary analysis of <strong>pike species (Esox)</strong> — 
+        including sequence alignment, phylogenetic tree reconstruction, 
+        and cross-species genomic comparisons.
+      </p>
+    </section>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-value">12</div>
+        <div class="stat-label">Species Analyzed</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">4.2k</div>
+        <div class="stat-label">Base Pairs</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">98.7%</div>
+        <div class="stat-label">Confidence</div>
+      </div>
+    </div>
+
+    <!-- SECTION HEADING -->
+    <div class="section-heading">
+      <div class="icon-box">📂</div>
+      <h2>Project Data</h2>
+      <div class="line"></div>
+    </div>
+
+    <!-- DOWNLOAD CARDS -->
+    <div class="card-grid">
+
+      <a href="#fasta-viewer-section" class="card" id="card-alignment">
+        <div class="shimmer"></div>
+        <div class="card-icon">📊</div>
+        <div class="card-title">Sequence Alignment</div>
+        <div class="card-desc">
+          Multiple sequence alignment of Esox cytochrome b gene 
+          across all sampled taxa.
+        </div>
+        <div class="card-meta">
+          <span class="file-badge">.fasta</span>
+          <span class="download-arrow">↓ View</span>
+        </div>
+      </a>
+
+      <a href="phylogenetic_tree.nwk" class="card" id="card-tree">
+        <div class="shimmer"></div>
+        <div class="card-icon">🌳</div>
+        <div class="card-title">Phylogenetic Tree</div>
+        <div class="card-desc">
+          Maximum-likelihood phylogeny in Newick format — 
+          visualize with any standard tree viewer.
+        </div>
+        <div class="card-meta">
+          <span class="file-badge">.nwk</span>
+          <span class="download-arrow">→</span>
+        </div>
+      </a>
+
+      <a href="#results-section" class="card" id="card-results">
+        <div class="shimmer"></div>
+        <div class="card-icon">📊</div>
+        <div class="card-title">Project Results</div>
+        <div class="card-desc">
+          Pairwise phylogenetic distance matrix and
+          heatmap visualisation across all sampled taxa.
+        </div>
+        <div class="card-meta">
+          <span class="file-badge">.csv + .png</span>
+          <span class="download-arrow">↓ View</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         INTERACTIVE VIEWERS
+         ═══════════════════════════════════════════════════ -->
+
+    <!-- ─── FASTA SEQUENCE VIEWER ─────────────────────── -->
+    <div class="section-heading" style="margin-top:var(--space-3xl)">
+      <div class="icon-box">📊</div>
+      <h2>Sequence Alignment Viewer</h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="viewer-section" id="fasta-viewer-section">
+      <div class="viewer-toolbar">
+        <div class="viewer-tabs">
+          <button class="viewer-tab active" data-tab="alignment" id="tab-alignment">Alignment</button>
+          <button class="viewer-tab" data-tab="raw" id="tab-raw">Raw FASTA</button>
+        </div>
+        <div class="viewer-info" id="fasta-info"></div>
+      </div>
+      <div class="viewer-body">
+        <div class="viewer-loading" id="fasta-loading">
+          <div class="spinner"></div>
+          <span>Loading alignment.fasta…</span>
+        </div>
+        <div class="viewer-error" id="fasta-error" style="display:none">
+          <span>⚠️ Could not load alignment.fasta</span>
+        </div>
+        <div class="fasta-alignment-view" id="fasta-alignment" style="display:none"></div>
+        <pre class="fasta-raw-view" id="fasta-raw" style="display:none"></pre>
+      </div>
+    </div>
+
+    <!-- ─── PHYLOGENETIC TREE VIEWER ──────────────────── -->
+    <div class="section-heading">
+      <div class="icon-box">🌳</div>
+      <h2>Phylogenetic Tree</h2>
+      <div class="line"></div>
+    </div>
+
+    <div class="viewer-section" id="tree-viewer-section">
+      <div class="viewer-body" style="padding: 2rem; display:flex; justify-content:center; align-items:center;">
+        <img
+          src="tree_final_dist.png"
+          alt="Phylogenetic tree of Esox species"
+          id="tree-image"
+          style="max-width:100%; height:auto; border-radius:12px; display:block;"
+          onerror="this.style.display='none'; document.getElementById('tree-img-error').style.display='flex';"
+        />
+        <div id="tree-img-error" style="display:none; flex-direction:column; align-items:center; gap:1rem; color:var(--text-muted);">
+          <span style="font-size:2rem;">⚠️</span>
+          <p>Could not load <strong>tree_final_dist.png</strong>. Make sure the file is in the same folder.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── RESULTS VIEWER ────────────────────────────── -->
+    <div class="section-heading" id="results-section">
+      <div class="icon-box">📊</div>
+      <h2>Research Results</h2>
+      <div class="line"></div>
+    </div>
+
+    <!-- Pairwise Distance Table -->
+    <div class="viewer-section" id="csv-viewer-section">
+      <div class="viewer-toolbar">
+        <div class="viewer-tabs">
+          <button class="viewer-tab active" id="tab-results-table">Distance Matrix</button>
+          <button class="viewer-tab" id="tab-results-heatmap">Heatmap</button>
+        </div>
+        <a href="phylogenetic_distances.csv" class="ctrl-btn pdf-download-link" download title="Download CSV">⬇ CSV</a>
+      </div>
+      <div class="viewer-body">
+        <!-- TABLE PANEL -->
+        <div id="results-table-panel">
+          <div class="viewer-loading" id="csv-loading">
+            <div class="spinner"></div>
+            <span>Loading phylogenetic_distances.csv…</span>
+          </div>
+          <div class="viewer-error" id="csv-error" style="display:none">
+            <span>⚠️ Could not load phylogenetic_distances.csv</span>
+          </div>
+          <div id="csv-table-wrap" style="display:none; overflow-x:auto; padding:1rem 1.5rem 1.5rem;"></div>
+        </div>
+        <!-- HEATMAP PANEL -->
+        <div id="results-heatmap-panel" style="display:none; padding:1.5rem; display:none; justify-content:center; align-items:center;">
+          <img
+            src="pairwise_distances_heatmap_abbreviated.png"
+            alt="Pairwise distances heatmap"
+            id="heatmap-img"
+            style="max-width:100%; height:auto; border-radius:10px;"
+            onerror="this.style.display='none'; document.getElementById('heatmap-error').style.display='flex';"
+          />
+          <div id="heatmap-error" style="display:none; flex-direction:column; align-items:center; gap:1rem; color:var(--text-muted);">
+            <span style="font-size:2rem;">⚠️</span>
+            <p>Could not load <strong>pairwise_distances_heatmap_abbreviated.png</strong>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DNA VISUALIZATION -->
+    <div class="dna-section">
+      <div class="dna-header">
+        <span class="dna-icon">🔬</span>
+        <h3>Sample Nucleotide Distribution</h3>
+      </div>
+      <div class="dna-strand" id="dna-strand"></div>
+      <div class="dna-legend">
+        <div class="legend-item"><span class="legend-dot" style="background:var(--accent-1)"></span> Adenine</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--accent-2)"></span> Thymine</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--accent-4)"></span> Guanine</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--accent-3)"></span> Cytosine</div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <p>&copy; 2026 Pike Phylogenetic Analysis Project</p>
+      <div class="footer-links">
+        <a href="#">Documentation</a>
+        <a href="#">GitHub</a>
+        <a href="#">Contact</a>
+      </div>
+    </footer>
+
+  </main>
+
+  <script>
+  (() => {
+    /* ═══════════════════════════════════════════════════
+       DNA STRAND GENERATOR (existing)
+       ═══════════════════════════════════════════════════ */
+    const strand = document.getElementById('dna-strand');
+    const bases = ['n-a','n-t','n-g','n-c'];
+    for (let i = 0; i < 60; i++) {
+      const el = document.createElement('div');
+      el.className = 'nucleotide ' + bases[Math.floor(Math.random() * 4)];
+      el.style.animationDelay = (i * 0.05) + 's';
+      strand.appendChild(el);
+    }
+
+    /* ═══════════════════════════════════════════════════
+       FASTA VIEWER
+       ═══════════════════════════════════════════════════ */
+    const NUCLEOTIDE_COLORS = {
+      'A': 'n-color-a', 'a': 'n-color-a',
+      'T': 'n-color-t', 't': 'n-color-t',
+      'G': 'n-color-g', 'g': 'n-color-g',
+      'C': 'n-color-c', 'c': 'n-color-c',
+      '-': 'n-color-gap'
+    };
+
+    function parseFasta(text) {
+      const sequences = [];
+      let current = null;
+      for (const line of text.split('\n')) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+        if (trimmed.startsWith('>')) {
+          current = { name: trimmed.slice(1).trim(), seq: '' };
+          sequences.push(current);
+        } else if (current) {
+          current.seq += trimmed;
+        }
+      }
+      return sequences;
+    }
+
+    function renderAlignment(sequences) {
+      const container = document.getElementById('fasta-alignment');
+      container.innerHTML = '';
+      if (!sequences.length) return;
+
+      const maxLen = Math.max(...sequences.map(s => s.seq.length));
+      const maxNameLen = Math.max(...sequences.map(s => s.name.length));
+
+      // Position ruler
+      const rulerRow = document.createElement('div');
+      rulerRow.className = 'aln-row aln-ruler';
+      const rulerLabel = document.createElement('div');
+      rulerLabel.className = 'aln-name';
+      rulerLabel.textContent = '';
+      rulerRow.appendChild(rulerLabel);
+      const rulerSeq = document.createElement('div');
+      rulerSeq.className = 'aln-seq';
+      for (let i = 0; i < maxLen; i++) {
+        const span = document.createElement('span');
+        span.className = 'aln-base aln-ruler-mark';
+        span.textContent = (i + 1) % 10 === 0 ? String(i + 1) : ((i + 1) % 5 === 0 ? '·' : ' ');
+        rulerSeq.appendChild(span);
+      }
+      rulerRow.appendChild(rulerSeq);
+      container.appendChild(rulerRow);
+
+      // Sequence rows
+      for (const entry of sequences) {
+        const row = document.createElement('div');
+        row.className = 'aln-row';
+        
+        const nameEl = document.createElement('div');
+        nameEl.className = 'aln-name';
+        nameEl.textContent = entry.name.replace(/_/g, ' ');
+        nameEl.title = entry.name;
+        row.appendChild(nameEl);
+
+        const seqEl = document.createElement('div');
+        seqEl.className = 'aln-seq';
+        for (let i = 0; i < entry.seq.length; i++) {
+          const base = entry.seq[i];
+          const span = document.createElement('span');
+          span.className = 'aln-base ' + (NUCLEOTIDE_COLORS[base] || '');
+          span.textContent = base;
+          span.title = `${entry.name} pos ${i+1}: ${base}`;
+          seqEl.appendChild(span);
+        }
+        row.appendChild(seqEl);
+        container.appendChild(row);
+      }
+    }
+
+    async function loadFasta() {
+      try {
+        const resp = await fetch('alignment.fasta');
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const text = await resp.text();
+        const sequences = parseFasta(text);
+
+        document.getElementById('fasta-loading').style.display = 'none';
+        document.getElementById('fasta-alignment').style.display = 'block';
+        document.getElementById('fasta-info').textContent = `${sequences.length} sequences · ${sequences[0]?.seq.length || 0} bp`;
+        document.getElementById('fasta-raw').textContent = text;
+
+        renderAlignment(sequences);
+      } catch (e) {
+        document.getElementById('fasta-loading').style.display = 'none';
+        document.getElementById('fasta-error').style.display = 'flex';
+        console.error('FASTA load error:', e);
+      }
+    }
+
+    // FASTA tab switching
+    document.querySelectorAll('#fasta-viewer-section .viewer-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('#fasta-viewer-section .viewer-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const which = tab.dataset.tab;
+        document.getElementById('fasta-alignment').style.display = which === 'alignment' ? 'block' : 'none';
+        document.getElementById('fasta-raw').style.display = which === 'raw' ? 'block' : 'none';
+      });
+    });
+
+    loadFasta();
+
+
+
+    /* ═══════════════════════════════════════════════════
+       CSV RESULTS VIEWER
+       ═══════════════════════════════════════════════════ */
+    function parseCSV(text) {
+      return text.trim().split('\n').map(row =>
+        row.split(',').map(cell => cell.trim().replace(/^"|"$/g, ''))
+      );
+    }
+
+    function colorClass(val) {
+      const n = parseFloat(val);
+      if (isNaN(n) || n === 0) return 'zero';
+      if (n < 0.10) return 'low';
+      if (n < 0.17) return 'mid';
+      return 'high';
+    }
+
+    function renderCSV(rows) {
+      const header = rows[0];
+      const body   = rows.slice(1);
+      const wrap   = document.getElementById('csv-table-wrap');
+      const table  = document.createElement('table');
+      table.className = 'dist-table';
+
+      // thead
+      const thead = table.createTHead();
+      const hRow  = thead.insertRow();
+      ['', ...header.slice(1)].forEach(h => {
+        const th = document.createElement('th'); th.textContent = h; hRow.appendChild(th);
+      });
+
+      // tbody
+      const tbody = table.createTBody();
+      body.forEach(row => {
+        if (!row.some(c => c)) return;
+        const tr = tbody.insertRow();
+        row.forEach((cell, ci) => {
+          const td = tr.insertCell();
+          td.textContent = ci === 0 ? cell : (parseFloat(cell) || cell === '0' ? parseFloat(cell).toFixed(4) : cell);
+          if (ci > 0) td.className = colorClass(cell);
+        });
+      });
+
+      wrap.innerHTML = '';
+      wrap.appendChild(table);
+      wrap.style.display = 'block';
+    }
+
+    async function loadCSV() {
+      try {
+        const resp = await fetch('phylogenetic_distances.csv');
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const text = await resp.text();
+        document.getElementById('csv-loading').style.display = 'none';
+        renderCSV(parseCSV(text));
+      } catch (e) {
+        document.getElementById('csv-loading').style.display = 'none';
+        document.getElementById('csv-error').style.display = 'flex';
+        console.error('CSV load error:', e);
+      }
+    }
+
+    // Results tab switching
+    document.getElementById('tab-results-table').addEventListener('click', () => {
+      document.getElementById('tab-results-table').classList.add('active');
+      document.getElementById('tab-results-heatmap').classList.remove('active');
+      document.getElementById('results-table-panel').style.display = 'block';
+      document.getElementById('results-heatmap-panel').style.display = 'none';
+    });
+    document.getElementById('tab-results-heatmap').addEventListener('click', () => {
+      document.getElementById('tab-results-heatmap').classList.add('active');
+      document.getElementById('tab-results-table').classList.remove('active');
+      document.getElementById('results-table-panel').style.display = 'none';
+      document.getElementById('results-heatmap-panel').style.display = 'flex';
+    });
+
+    loadCSV();
+
+  })();
+  </script>
+
+</body>
+</html>
